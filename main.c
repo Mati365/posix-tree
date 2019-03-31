@@ -137,10 +137,10 @@ char* join_paths(const char* parent, const char* child) {
   int total_length = parent_length + strlen(child);
 
   if (child[0] == '/' || parent[parent_length - 1] == '/') {
-    output = malloc(total_length);
+    output = malloc(total_length + 1);
     sprintf(output, "%s%s", parent, child);
   } else {
-    output = malloc(total_length + 1);
+    output = malloc(total_length + 2);
     sprintf(output, "%s/%s", parent, child);
   }
 
@@ -194,9 +194,8 @@ v_stack tree_list_files(
 
     // pobieranie informacji nt. symlinków
     if (file->is_symlink) {
-      char* relative_path = malloc(MAX_POSIX_FILENAME_LEN + 1);
+      char* relative_path = malloc(MAX_POSIX_FILENAME_LEN);
       size_t buf = readlink(file->path, relative_path, MAX_POSIX_FILENAME_LEN);
-      relative_path[MAX_POSIX_FILENAME_LEN] = '\0';
 
       if (buf) {
         struct stat link_stat;
@@ -209,8 +208,11 @@ v_stack tree_list_files(
         // ścieżka relatywna ./test prefixowana jest jeszcze z nazwą pliku
         // czyli ./nazwa_pliku/./test i z tego liczona jest absolutna ściezka
         char* fixed_relative_path = join_paths(path, relative_path);
-        char* absolute_path = malloc(PATH_MAX);
+        char* absolute_path = malloc(PATH_MAX + 1);
+
         realpath(fixed_relative_path, absolute_path);
+        absolute_path[PATH_MAX] = '\0';
+
         symlink_dest->path = absolute_path;
         free(fixed_relative_path);
 
