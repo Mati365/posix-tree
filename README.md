@@ -12,6 +12,7 @@ Simple header only lib that allows to print folder content in UNIX tree like for
 
   tree_print(".", &flags);
 ```
-output: <br />
+
+**output:** <br />
 ![Screen](/screens/1.png?raw=true "Screen")
 
