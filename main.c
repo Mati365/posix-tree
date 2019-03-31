@@ -405,7 +405,7 @@ void tree_print(
  * -l Follow symlinks
  * -f Print full path
  */
-int main() {
+int main(int argc, char* argv[]) {
   struct tree_print_flags flags = {
     .print_full_path = true,
     .dir_only = false,
@@ -413,6 +413,10 @@ int main() {
     .max_level = 4,
   };
 
-  tree_print(".", &flags);
+  char* default_path = argv[1];
+  if (default_path == NULL)
+    default_path = ".";
+
+  tree_print(default_path, &flags);
   return 0;
 }
