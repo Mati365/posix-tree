@@ -219,14 +219,17 @@ v_stack tree_list_files(
         free(fixed_relative_path);
 
         // żeby podczas release się nie zawiesiło
-        stat(absolute_path, &link_stat);
-
-        symlink_dest->is_dir = S_ISDIR(link_stat.st_mode);
+        symlink_dest->is_symlink = false;
         symlink_dest->symlink_dest = NULL;
+
+        int stat_result = stat(absolute_path, &link_stat);
+        if (stat_result == 0)
+          symlink_dest->is_dir = S_ISDIR(link_stat.st_mode);
+        else
+          symlink_dest->is_dir = false;
 
         // przypisanie pliku
         file->symlink_dest = symlink_dest;
-
       } else {
         // jeśli coś poszło nie tak :(
         free(relative_path);
@@ -354,7 +357,7 @@ int tree_recursive_print(
       stats->files_count++;
 
       // jeśli symlink i pozwala na follow
-      if (file->symlink_dest && file->symlink_dest->is_dir && flags->follow_symlinks) {
+      if (file->is_symlink && file->symlink_dest->is_dir && flags->follow_symlinks) {
         v_stack_push(parents, (void*) last_file);
         tree_recursive_print(
             file->symlink_dest->path,
@@ -420,5 +423,6 @@ int main(int argc, char* argv[]) {
     default_path = ".";
 
   tree_print(default_path, &flags);
+
   return 0;
 }
