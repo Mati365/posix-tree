@@ -1,3 +1,7 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -130,19 +134,16 @@ char* join_paths(const char* parent, const char* child) {
   if (!parent || !child)
     return NULL;
 
-  // jeśli druga część ścieżki zaczyna się od /
+  // jeśli druga część ścieżki zaczyna się od /
   // lub rodzic kończy się na / to łącz bez slasha
   char* output = NULL;
   int parent_length = strlen(parent);
   int total_length = parent_length + strlen(child);
 
-  if (child[0] == '/' || parent[parent_length - 1] == '/') {
-    output = malloc(total_length + 1);
-    sprintf(output, "%s%s", parent, child);
-  } else {
-    output = malloc(total_length + 2);
-    sprintf(output, "%s/%s", parent, child);
-  }
+  if (child[0] == '/' || parent[parent_length - 1] == '/')
+    asprintf(&output, "%s%s", parent, child);
+  else
+    asprintf(&output, "%s/%s", parent, child);
 
   return output;
 }
@@ -196,6 +197,7 @@ v_stack tree_list_files(
     if (file->is_symlink) {
       char* relative_path = malloc(MAX_POSIX_FILENAME_LEN);
       size_t buf = readlink(file->path, relative_path, MAX_POSIX_FILENAME_LEN);
+      relative_path[buf] = '\0';
 
       if (buf) {
         struct stat link_stat;
